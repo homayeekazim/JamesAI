@@ -1,4 +1,5 @@
 'use strict'
+const getCurrentWeather = require('./lib/getCurrentWeather')
 const firstOfEntityRole = function(message, entity, role) {
   role = role || 'generic';
 
@@ -90,15 +91,32 @@ exports.handle = (client) => {
       return false
     },
 
-    prompt() {
-      let weatherData = {
-        temperature: 60,
-        condition: 'sunny',
-        city: client.getConversationState().weatherCity.value,
-      }
+    prompt(callback) {
+      getCurrentWeather(client.getConversationState().weatherCity.value, resultBody => {
+        if (!resultBody || resultBody.cod !== 200) {
+          console.log('Error getting weather.')
+          callback()
+          return
+        }
 
-      client.addResponse('app:response:name:provide_weather/current', weatherData)
-      client.done()
+        const weatherDescription = (
+          resultBody.weather.length > 0 ?
+          resultBody.weather[0].description :
+          null
+        )
+
+        const weatherData = {
+          temperature: resultBody.main.temp,
+          condition: weatherDescription,
+          city: resultBody.name,
+        }
+
+        console.log('sending real weather:', weatherData)
+        client.addResponse('app:response:name:provide_weather/current', weatherData)
+        client.done()
+
+        callback()
+      })
     }
   })
 
