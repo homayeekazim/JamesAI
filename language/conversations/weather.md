@@ -19,4 +19,4 @@ what is the temperature in [Dubai](city)
 * ask_current_weather/temperature
 
 whats the temperature at [Heathrow](city)
-* greeting
+* ask_current_weather/temperature
